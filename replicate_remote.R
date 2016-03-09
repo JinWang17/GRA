@@ -463,7 +463,7 @@ aa_check <- data.frame(snps=snpsOfInterest,
 print(aa_check)
 }
 
-########## Table 1 #################################################################################
+# table 1 
 
 ph_338 <- data.frame(sex = phdata(tophits)$sex, age = phdata(tophits)$age, 
                      race = phdata(tophits)$race, dzext = phdata(tophits)$dzext, 
@@ -497,18 +497,19 @@ sqrt(var(ph_294$age))
 quantile(ph_294$age, c(0.05, 0.5, 0.95))
 
 ########## check the ph result by genAbel ##########################################################  
-
+if(1<0){
 ph <- mlreg(GASurv(time,status)~1,df2, trait.type="survival")
 png("/lustre/scr/j/i/jinjin/GRA/CALGB80303/data/replicate/ph_check.png", width=2000, height=1000, pointsize=18)
 plot(ph, ylim = c(0, 8))
 dev.off()
 descriptives.scan(data = ph, top = 20, sortby = "P1df")
 
-
 #cox1 <- mlreg(GASurv(time,status)~1,df, trait.type="survival")
 #cox2 <- mlreg(GASurv(time,status)~1,df, trait.type="survival")
 #cox3 <- mlreg(GASurv(time,status)~1,df, trait.type="survival")
 #cox4 <- mlreg(GASurv(time,status)~1,df, trait.type="survival")
+}
+
 
 rm(list=ls())
 
