@@ -1,0 +1,7 @@
+sed -i 's/"//g' 80303.txt
+sed -i 's/"//g' 40503.txt
+sed -i 's/"//g' 80405.txt
+sed -i 's/"//g' 80405_1.txt
+sed -i 's/"//g' 80405_2.txt
+
+metal meta_metal.txt > meta.metal.log

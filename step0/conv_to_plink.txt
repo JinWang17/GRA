@@ -1,0 +1,88 @@
+# tfam
+head -10 80405_1_geno.csv | tail -1 > expid_geno_1.txt
+cat expid_geno_1.txt | tr "," "\n" > expid_list_1.txt
+cut -d"_" -f2,3 expid_list_1.txt > 80405_expid_1.txt
+wc -l 80405_expid_1.txt
+tail -874 80405_expid_1.txt > expid_list_1.txt
+sed -i "s/^/80405_1_/g" expid_list_1.txt
+
+head -10 80405_2_geno.csv | tail -1 > expid_geno_2.txt
+cat expid_geno_2.txt | tr "," "\n" > expid_list_2.txt
+sed "s/N71//g" expid_list_2.txt > 80405_expid_2.txt
+wc -l 80405_expid_2.txt
+tail -631 80405_expid_2.txt > expid_list_2.txt
+sed -i "s/^/80405_2_/g" expid_list_2.txt
+
+head -10 40503_geno.csv | tail -1 > expid.txt
+cat expid.txt | tr "," "\n" > expid_list.txt
+sed "s/N71//g" expid_list_2.txt > 80405_expid_2.txt
+wc -l 80405_expid_2.txt
+tail -631 80405_expid_2.txt > expid_list_2.txt
+sed -i "s/^/80405_2_/g" expid_list_2.txt
+
+
+# tped
+tail -731442 80405_1_geno.csv > 80405_geno_int.csv
+cut -d"," -f1 80405_geno_int.csv > snp_1.txt
+cut -d"," --complement -f1 80405_geno_int.csv > code_1.txt
+sed 's/,//g' code_1.txt > code_2.txt
+sed -e 's/\(.\)/\1 /g' < code_2.txt > 80405_1_geno.tped
+sed -i "s/$/ 0 0/g" snp_1.txt
+sed -i "s/^/0 /g" snp_1.txt
+paste -d" " snp_1.txt 80405_1_geno.tped > 80405_geno.tped
+mv 80405_geno.tped 80405_geno_1.tped
+sed -i "s/-/0/g" 80405_geno_1.tped
+
+
+tail -964058 80405_2_geno.csv > geno_int.csv
+cut -d"," -f1 geno_int.csv > snp_1.txt
+cut -d"," --complement -f1 geno_int.csv > code_1.txt
+sed -i 's/,//g' code_1.txt
+sed -e 's/\(.\)/\1 /g' < code_1.txt > geno.tped
+sed -i "s/-/0/g" geno.tped
+sed -i "s/$/ 0 0/g" snp_1.txt
+sed -i 's/^/0 /g' snp_1.txt
+paste -d" " snp_1.txt geno.tped > 80405_geno_2.tped
+
+
+
+tail -964058 40503_geno.csv > 40503_geno_int.csv
+cut -d"," -f1 40503_geno_int.csv > snp_2.txt
+cut -d"," --complement -f1 40503_geno_int.csv > code_2.txt
+sed -i 's/,//g' code_2.txt
+sed -e 's/\(.\)/\1 /g' < code_2.txt > geno_2.tped
+sed -i "s/-/0/g" geno_2.tped
+sed -i "s/$/ 0 0/g" snp_2.txt
+sed -i "s/^/0 /g" snp_2.txt
+paste -d" " snp_2.txt geno_2.tped > 40503_geno.tped
+
+
+# remove those NA records
+grep -v "NA" < 80405_geno_1.tfam > 80405_geno_1_final.tfam
+cut -d" " -f1 80405_geno_1.tfam | grep "NA" > 80405_list_1.txt
+#7:NA12750
+#250:NA12751
+#456:NA12740
+#631:NA12003
+#779:NA12004
+#870:NA10838
+grep -v "greNA" < 80405_geno_2.tfam > 80405_geno_2_final.tfam
+cut -d" " -f1 80405_geno_2.tfam | grep "NA" > 80405_list_2.txt
+#55:NA12750
+#252:NA12751
+#367:NA12740
+#448:NA12003
+#497:NA12004
+#619:NA10838
+cut -d" " --complement -f17,18,503,504,915,916,1265,1266,1561,1562,1643,1644 80405_geno_1.tped > 80405_geno_1_final.tped 
+cut -d" " --complement -f113,114,507,508,737,738,899,900,997,998,1241,1242 80405_geno_2.tped > 80405_geno_2_final.tped
+
+
+# pheno
+# map patid to plateid
+# add records for those that are genotyped twice
+# add records for those that are NA 
+cat 80405_pheno.csv | tr "," " " | grep -v "#N/A" > 80405_pheno.txt
+cat 40503_pheno.csv | tr "," " " > 40503_pheno.txt
+sed -i 's/\#N\/A/0/g' 40503_pheno.txt
+

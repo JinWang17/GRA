@@ -1,0 +1,12 @@
+SCHEME STDERR
+
+MARKER        snp
+ALLELE        refallele effallele
+PVALUE        pvalue
+EFFECT        coef
+STDERR        sd
+WEIGHT        n
+PROCESS       80303.txt 
+PROCESS	      40503.txt
+OUTFILE       meta_80303_80405_40503.txt
+ANALYZE
