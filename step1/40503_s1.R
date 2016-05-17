@@ -19,7 +19,7 @@ df <- load.gwaa.data(phe = phenofile, gen = "genotype.raw", force = T)
 df <- df[phdata(df)$cau == 1, ]
 df <- df[phdata(df)$treated == 1, ]
 
-mc = check.marker(df, callrate = 0.95, extr.call = 0.95, 
+mc = check.marker(df, callrate = 0.95, extr.call = 0.95, maf = 0.05, 
                   p.level = 1e-08, het.fdr = 0, ibs.exclude = "lower")
 df = df[mc$idok, mc$snpok]
 
@@ -55,6 +55,7 @@ coef <- rep(0, nsnps)
 v <- rep(0, nsnps)
 p <- rep(0, nsnps)
 ss <- rep(0, nsnps)
+maf <- rep(0, nsnps)
 
 for(i in 1:nsnps){
   if (i%%10000==0) print(paste(i, date()));
@@ -68,9 +69,12 @@ for(i in 1:nsnps){
 
 refallele <- refallele(gtdata(df))
 effallele <- effallele(gtdata(df))
+sumdf <- summary(gtdata(df))
+afr <- sumdf[, "Q.2"]
+maf <- pmin(afr, (1. - afr))
 
 result <- data.frame(snp = snp, chr = chr, refallele = refallele, effallele = effallele,
-                     bp = bp, coef = coef, sd = sqrt(v), pvalue = p, n = ss)
+                     bp = bp, coef = coef, sd = sqrt(v), pvalue = p, n = ss, maf = maf)
 
 ################ output ######################################
 

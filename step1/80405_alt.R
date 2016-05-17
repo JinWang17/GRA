@@ -95,7 +95,7 @@ save("df" = df, file = "/lustre/scr/j/i/jinjin/GRA/meta_analysis/80405.Rdata")
 for(i in 1:nsnps){
   if (i%%10000==0) print(paste(i, date()));
   fit <- summary(coxph(Surv(time, status) ~ snps[,i]*phdata(df)$Bev + snps[,i]
-                       + phdata(df)$Bev + phdata(df)$Cetux + loc1 + loc2 + loc3 + loc4 
+                       + loc1 + loc2 + loc3 + loc4 
                        + strata(phdata(df)$prot_chemo, phdata(df)$pr_adj, phdata(df)$pr_rad)))
   coef[i] <- fit$coef[1, 1]
   v[i] <- fit$coef[1,3]^2
@@ -115,7 +115,7 @@ result <- data.frame(snp = snp, chr = chr, refallele = refallele, effallele = ef
 
 ################ output ######################################
 
-write.table(result, "/lustre/scr/j/i/jinjin/GRA/meta_analysis/result/80405.txt", 
+write.table(result, "/lustre/scr/j/i/jinjin/GRA/meta_analysis/result/80405_alt.txt", 
             sep="\t")
 
 ################ get statistics #############################
@@ -150,7 +150,7 @@ save("df1" = df1, file = "/lustre/scr/j/i/jinjin/GRA/meta_analysis/80405_1.Rdata
 for(i in 1:nsnps){
   if (i%%10000==0) print(paste(i, date()));
   fit <- summary(coxph(Surv(time, status) ~ snps[,i]*phdata(df1)$Bev + snps[,i]
-                       + phdata(df1)$Bev + phdata(df1)$Cetux + loc1 + loc2 + loc3 + loc4   
+                       + loc1 + loc2 + loc3 + loc4   
                        + strata(phdata(df1)$prot_chemo, phdata(df1)$pr_adj, phdata(df1)$pr_rad)))
   coef[i] <- fit$coef[1, 1]
   v[i] <- fit$coef[1,3]^2
@@ -169,7 +169,7 @@ result <- data.frame(snp = snp, chr = chr, refallele = refallele, effallele = ef
 
 ################ output ######################################
 
-write.table(result, "/lustre/scr/j/i/jinjin/GRA/meta_analysis/result/80405_1.txt", 
+write.table(result, "/lustre/scr/j/i/jinjin/GRA/meta_analysis/result/80405_1_alt.txt", 
             sep="\t")
 
 ################ get statistics #############################
@@ -204,7 +204,7 @@ save("df2" = df2, file = "/lustre/scr/j/i/jinjin/GRA/meta_analysis/80405_2.Rdata
 for(i in 1:nsnps){
   if (i%%10000==0) print(paste(i, date()));
   fit <- summary(coxph(Surv(time, status) ~ snps[,i]*phdata(df2)$Bev + snps[,i]
-                       + phdata(df2)$Bev + phdata(df2)$Cetux + loc1 + loc2 + loc3 + loc4   
+                       + loc1 + loc2 + loc3 + loc4   
                        + strata(phdata(df2)$prot_chemo, phdata(df2)$pr_adj, phdata(df2)$pr_rad)))
   coef[i] <- fit$coef[1, 1]
   v[i] <- fit$coef[1,3]^2
@@ -223,5 +223,5 @@ result <- data.frame(snp = snp, chr = chr, refallele = refallele, effallele = ef
 
 ################ output ######################################
 
-write.table(result, "/lustre/scr/j/i/jinjin/GRA/meta_analysis/result/80405_2.txt", 
+write.table(result, "/lustre/scr/j/i/jinjin/GRA/meta_analysis/result/80405_2_alt.txt", 
             sep="\t")

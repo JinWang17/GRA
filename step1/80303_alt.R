@@ -59,7 +59,7 @@ maf <- rep(0, nsnps)
 for(i in 1:nsnps){
   if (i%%10000==0) print(paste(i, date()));
   fit <- summary(coxph(Surv(time, status) ~ snps[,i]*phdata(df)$arm + snps[,i]
-                       + strata(phdata(df)$priorrt, phdata(df)$dzext,
+                       + phdata(df)$arm + strata(phdata(df)$priorrt, phdata(df)$dzext,
                                                  phdata(df)$ps) ))
   coef[i] <- fit$coef[1, 1]
   v[i] <- fit$coef[1,3]^2
@@ -78,5 +78,5 @@ result <- data.frame(snp = snp, chr = chr, refallele = refallele, effallele = ef
 
 ################ output ######################################
 
-write.table(result, "/lustre/scr/j/i/jinjin/GRA/meta_analysis/result/80303.txt", 
+write.table(result, "/lustre/scr/j/i/jinjin/GRA/meta_analysis/result/80303_alt.txt", 
             sep="\t")
