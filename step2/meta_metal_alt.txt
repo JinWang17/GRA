@@ -7,7 +7,7 @@ EFFECT        coef
 STDERR        sd
 WEIGHT        n
 MAF           maf
-PROCESS       80303.txt 
+PROCESS       80303_alt.txt 
 PROCESS	      40503.txt
-PROCESS       80405.txt
+PROCESS       80405_alt.txt
 ANALYZE

@@ -38,4 +38,47 @@ rm 80405_1.txt 80405_2.txt
 rm header.txt
 
 #### call metal ###################### 
-metal meta_metal.txt > meta.metal.log
+metal meta_metal.txt > meta_metal.log
+sort -g -k6 METAANALYSIS1.TBL > result.txt
+head -101 result.txt > top100.txt
+
+
+
+
+
+
+#################################################
+# alternative
+#################################################
+
+sed -i 's/"//g' 80303_alt.txt
+sed -i 's/"//g' 40503.txt
+sed -i 's/"//g' 80405_alt.txt
+sed -i 's/"//g' 80405_1_alt.txt
+sed -i 's/"//g' 80405_2_alt.txt
+
+head -1 80303_alt.txt > header.txt
+sed -i '1d' 80303_alt.txt
+sed -i '1d' 80405_alt.txt
+sed -i '1d' 40503.txt
+sed -i '1d' 80405_1_alt.txt
+sed -i '1d' 80405_2_alt.txt
+
+cut -f2- 80303_alt.txt > temp
+cat header.txt temp > 80303_alt.txt
+cut -f2- 40503.txt > temp
+cat header.txt temp > 40503.txt
+cut -f2- 80405_alt.txt > temp
+cut -f2- 80405_1_alt.txt > temp1
+cut -f2- 80405_2_alt.txt > temp2
+cat header.txt temp temp1 temp2 > 80405_alt.txt
+
+rm temp temp1 temp2
+rm 80405_1_alt.txt 80405_2_alt.txt 
+rm header.txt
+
+#### call metal ###################### 
+metal meta_metal_alt.txt > meta_metal_alt.log
+sort -g -k6 METAANALYSIS1.TBL > result_alt.txt
+head -101 result_alt.txt > top100.txt
+
