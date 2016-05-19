@@ -56,15 +56,28 @@ v <- rep(0, nsnps)
 p <- rep(0, nsnps)
 ss <- rep(0, nsnps)
 maf <- rep(0, nsnps)
+maincoef <- rep(0, nsnps)
+mainv <- rep(0, nsnps)
+
+save("df" = df, file = "/lustre/scr/j/i/jinjin/GRA/meta_analysis/40503.Rdata")
+
+fit1 <- survfit(Surv(time, status) ~ phdata(df)$arm)
+png("/lustre/scr/j/i/jinjin/GRA/meta_analysis/result/40503.png", width=1000, height=1000, pointsize=18)
+plot(fit1, lty=as.numeric(as.factor(fit1$strata)), xlab = "Time since Randomization(Months)", ylab = "Probability", cex = 1)
+legend(30, 0.9, substring(names(fit1$strata), 6, nchar(names(fit1$strata))), lty=as.numeric(as.factor(fit1$strata)))
+dev.off()
 
 for(i in 1:nsnps){
   if (i%%10000==0) print(paste(i, date()));
-  fit <- summary(coxph(Surv(time, status) ~ snps[,i]*phdata(df)$arm + snps[,i] 
+  int <- snps[,i]*phdata(df)$arm
+  fit <- summary(coxph(Surv(time, status) ~ int + snps[,i] 
                        + phdata(df)$arm + strata(phdata(df)$stra2, phdata(df)$stra3) ))
   coef[i] <- fit$coef[1, 1]
-  v[i] <- fit$coef[1,3]^2
-  p[i] <- fit$coef[1,5]
+  v[i] <- fit$coef[1, 3]
+  p[i] <- fit$coef[1, 5]
   ss[i] <- fit$n
+  maincoef[i] <- fit$coef[3, 1]
+  mainv[i] <- fit$coef[3, 3]
 }
 
 refallele <- refallele(gtdata(df))
@@ -74,7 +87,8 @@ afr <- sumdf[, "Q.2"]
 maf <- pmin(afr, (1. - afr))
 
 result <- data.frame(snp = snp, chr = chr, refallele = refallele, effallele = effallele,
-                     bp = bp, coef = coef, sd = sqrt(v), pvalue = p, n = ss, maf = maf)
+                     bp = bp, coef = coef, sd = v, maincoef = maincoef, mainsd = mainv,
+                     pvalue = p, n = ss, maf = maf)
 
 ################ output ######################################
 

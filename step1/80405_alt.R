@@ -27,6 +27,8 @@ df1 <- load.gwaa.data(phe = phenofile, gen = "genotype1.raw", force = T)
 df2 <- load.gwaa.data(phe = phenofile, gen = "genotype2.raw", force = T)
 df1 <- df1[phdata(df1)$cau == 1, ] 
 df2 <- df2[phdata(df2)$cau == 1, ] 
+df1 <- df1[phdata(df1)$primary == 1, ] 
+df2 <- df2[phdata(df2)$primary == 1, ] 
 mc1 = check.marker(df1, callrate = 0.95, extr.call = 0.95, maf = 0.05, 
                   p.level = 1e-08, het.fdr = 0, ibs.exclude = "lower")
 df1 = df1[mc1$idok, mc1$snpok]
@@ -94,7 +96,8 @@ loc4 <- as.numeric(phdata(df)$tumorside == "Transverse")
 save("df" = df, file = "/lustre/scr/j/i/jinjin/GRA/meta_analysis/80405.Rdata")
 for(i in 1:nsnps){
   if (i%%10000==0) print(paste(i, date()));
-  fit <- summary(coxph(Surv(time, status) ~ snps[,i]*phdata(df)$Bev + snps[,i]
+  int <- snps[,i]*phdata(df)$Bev
+  fit <- summary(coxph(Surv(time, status) ~ int + snps[,i]
                        + loc1 + loc2 + loc3 + loc4 
                        + strata(phdata(df)$prot_chemo, phdata(df)$pr_adj, phdata(df)$pr_rad)))
   coef[i] <- fit$coef[1, 1]
@@ -149,7 +152,8 @@ loc4 <- as.numeric(phdata(df1)$tumorside == "Transverse")
 save("df1" = df1, file = "/lustre/scr/j/i/jinjin/GRA/meta_analysis/80405_1.Rdata")
 for(i in 1:nsnps){
   if (i%%10000==0) print(paste(i, date()));
-  fit <- summary(coxph(Surv(time, status) ~ snps[,i]*phdata(df1)$Bev + snps[,i]
+  int <- snps[,i] * phdata(df1)$Bev
+  fit <- summary(coxph(Surv(time, status) ~ int + snps[,i]
                        + loc1 + loc2 + loc3 + loc4   
                        + strata(phdata(df1)$prot_chemo, phdata(df1)$pr_adj, phdata(df1)$pr_rad)))
   coef[i] <- fit$coef[1, 1]
@@ -202,8 +206,9 @@ loc4 <- as.numeric(phdata(df2)$tumorside == "Transverse")
 
 save("df2" = df2, file = "/lustre/scr/j/i/jinjin/GRA/meta_analysis/80405_2.Rdata")
 for(i in 1:nsnps){
-  if (i%%10000==0) print(paste(i, date()));
-  fit <- summary(coxph(Surv(time, status) ~ snps[,i]*phdata(df2)$Bev + snps[,i]
+  if (i%%10000==0) print(paste(i, date()))
+  int <- snps[,i]*phdata(df2)$Bev
+  fit <- summary(coxph(Surv(time, status) ~ int + snps[,i]
                        + loc1 + loc2 + loc3 + loc4   
                        + strata(phdata(df2)$prot_chemo, phdata(df2)$pr_adj, phdata(df2)$pr_rad)))
   coef[i] <- fit$coef[1, 1]

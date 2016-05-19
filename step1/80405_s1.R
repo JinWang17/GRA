@@ -27,6 +27,8 @@ df1 <- load.gwaa.data(phe = phenofile, gen = "genotype1.raw", force = T)
 df2 <- load.gwaa.data(phe = phenofile, gen = "genotype2.raw", force = T)
 df1 <- df1[phdata(df1)$cau == 1, ] 
 df2 <- df2[phdata(df2)$cau == 1, ] 
+df1 <- df1[phdata(df1)$primary == 1, ]
+df2 <- df2[phdata(df2)$primary == 1, ] 
 mc1 = check.marker(df1, callrate = 0.95, extr.call = 0.95, maf = 0.05, 
                   p.level = 1e-08, het.fdr = 0, ibs.exclude = "lower")
 df1 = df1[mc1$idok, mc1$snpok]
@@ -35,6 +37,8 @@ mc2 = check.marker(df2, callrate = 0.95, extr.call = 0.95, maf = 0.05,
 df2 = df2[mc2$idok, mc2$snpok]
 nsnps(gtdata(df1))
 nsnps(gtdata(df2))
+
+df0 = merge(df1, df2)
 
 df1_m = df1[, is.element(snpnames(gtdata(df1)), snpnames(gtdata(df2)))]
 df2_m = df2[, is.element(snpnames(gtdata(df2)), snpnames(gtdata(df1)))]
@@ -63,6 +67,17 @@ rm(df2_m)
 
 #############################################################
 
+################ plot #######################################
+
+time <- phdata(df0)$ostime
+status <- phdata(df0)$osevent
+
+fit1 <- survfit(Surv(time, status) ~ phdata(df0)$Bev)
+png("/lustre/scr/j/i/jinjin/GRA/meta_analysis/result/80405.png", width=1000, height=1000, pointsize=18)
+plot(fit1, lty=as.numeric(as.factor(fit1$strata)), xlab = "Time since Randomization(Months)", ylab = "Probability", cex = 1)
+legend(30, 0.9, substring(names(fit1$strata), 6, nchar(names(fit1$strata))), lty=as.numeric(as.factor(fit1$strata)))
+dev.off()
+
 ################ get statistics #############################
 
 class(df)
@@ -85,22 +100,30 @@ v <- rep(0, nsnps)
 p <- rep(0, nsnps)
 ss <- rep(0, nsnps)
 maf <- rep(0, nsnps)
+maincoef <- rep(0, nsnps)
+mainv <- rep(0, nsnps)
 
 loc1 <- as.numeric(phdata(df)$tumorside == "Left")
 loc2 <- as.numeric(phdata(df)$tumorside == "Right")
 loc3 <- as.numeric(phdata(df)$tumorside == "Multiple")
 loc4 <- as.numeric(phdata(df)$tumorside == "Transverse")
 
-save("df" = df, file = "/lustre/scr/j/i/jinjin/GRA/meta_analysis/80405.Rdata")
+save("df" = df, "df0" = df0, 
+     file = "/lustre/scr/j/i/jinjin/GRA/meta_analysis/80405.Rdata")
+
+
 for(i in 1:nsnps){
-  if (i%%10000==0) print(paste(i, date()));
-  fit <- summary(coxph(Surv(time, status) ~ snps[,i]*phdata(df)$Bev + snps[,i]
-                       + phdata(df)$Bev + phdata(df)$Cetux + loc1 + loc2 + loc3 + loc4 
+  if (i%%10000==0) print(paste(i, date()))
+  int <- snps[,i]*phdata(df)$Bev
+  fit <- summary(coxph(Surv(time, status) ~ int + phdata(df)$Bev
+                       + snps[,i] + loc1 + loc2 + loc3 + loc4 
                        + strata(phdata(df)$prot_chemo, phdata(df)$pr_adj, phdata(df)$pr_rad)))
   coef[i] <- fit$coef[1, 1]
-  v[i] <- fit$coef[1,3]^2
+  v[i] <- fit$coef[1,3]
   p[i] <- fit$coef[1,5]
   ss[i] <- fit$n
+  maincoef[i] <- fit$coef[2, 1]
+  mainv[i] <- fit$coef[2, 3]
 }
 
 refallele <- refallele(gtdata(df))
@@ -111,7 +134,8 @@ afr <- sumdf[, "Q.2"]
 maf <- pmin(afr, (1. - afr))
 
 result <- data.frame(snp = snp, chr = chr, refallele = refallele, effallele = effallele,
-                     bp = bp, coef = coef, sd = sqrt(v), pvalue = p, n = ss, maf = maf)
+                     bp = bp, coef = coef, sd = v, maincoef = maincoef, mainsd = mainv,
+                     pvalue = p, n = ss, maf = maf)
 
 ################ output ######################################
 
@@ -126,6 +150,7 @@ descriptives.trait(df1)
 descriptives.marker(df1)
 nsnps <- nsnps(gtdata(df1))
 
+
 snps <- as.numeric(gtdata(df1))
 chr <- c(as.numeric(chromosome(gtdata(df1))))
 snp <- c(colnames(snps))
@@ -139,33 +164,39 @@ v <- rep(0, nsnps)
 p <- rep(0, nsnps)
 ss <- rep(0, nsnps)
 maf <- rep(0, nsnps)
+maincoef <- rep(0, nsnps)
+mainv <- rep(0, nsnps)
 
 loc1 <- as.numeric(phdata(df1)$tumorside == "Left")
 loc2 <- as.numeric(phdata(df1)$tumorside == "Right")
 loc3 <- as.numeric(phdata(df1)$tumorside == "Multiple")
 loc4 <- as.numeric(phdata(df1)$tumorside == "Transverse")
 
-
-save("df1" = df1, file = "/lustre/scr/j/i/jinjin/GRA/meta_analysis/80405_1.Rdata")
+save("df1" = df1, file = "/lustre/scr/j/i/jinjin/GRA/meta_analysis/80405.Rdata")
 for(i in 1:nsnps){
-  if (i%%10000==0) print(paste(i, date()));
-  fit <- summary(coxph(Surv(time, status) ~ snps[,i]*phdata(df1)$Bev + snps[,i]
-                       + phdata(df1)$Bev + phdata(df1)$Cetux + loc1 + loc2 + loc3 + loc4   
+  if (i%%10000==0) print(paste(i, date()))
+  int <- snps[,i]*phdata(df1)$Bev
+  fit <- summary(coxph(Surv(time, status) ~ int + phdata(df1)$Bev
+                       + snps[,i] + loc1 + loc2 + loc3 + loc4 
                        + strata(phdata(df1)$prot_chemo, phdata(df1)$pr_adj, phdata(df1)$pr_rad)))
   coef[i] <- fit$coef[1, 1]
-  v[i] <- fit$coef[1,3]^2
+  v[i] <- fit$coef[1,3]
   p[i] <- fit$coef[1,5]
   ss[i] <- fit$n
+  maincoef[i] <- fit$coef[2, 1]
+  mainv[i] <- fit$coef[2, 3]
 }
 
 refallele <- refallele(gtdata(df1))
 effallele <- effallele(gtdata(df1))
-sumdf <- summary(gtdata(df1))
-afr <- sumdf[, "Q.2"]
+
+sumdf1 <- summary(gtdata(df1))
+afr <- sumdf1[, "Q.2"]
 maf <- pmin(afr, (1. - afr))
 
 result <- data.frame(snp = snp, chr = chr, refallele = refallele, effallele = effallele,
-                     bp = bp, coef = coef, sd = sqrt(v), pvalue = p, n = ss, maf = maf)
+                     bp = bp, coef = coef, sd = v, maincoef = maincoef, mainsd = mainv,
+                     pvalue = p, n = ss, maf = maf)
 
 ################ output ######################################
 
@@ -180,6 +211,7 @@ descriptives.trait(df2)
 descriptives.marker(df2)
 nsnps <- nsnps(gtdata(df2))
 
+
 snps <- as.numeric(gtdata(df2))
 chr <- c(as.numeric(chromosome(gtdata(df2))))
 snp <- c(colnames(snps))
@@ -193,33 +225,39 @@ v <- rep(0, nsnps)
 p <- rep(0, nsnps)
 ss <- rep(0, nsnps)
 maf <- rep(0, nsnps)
+maincoef <- rep(0, nsnps)
+mainv <- rep(0, nsnps)
 
 loc1 <- as.numeric(phdata(df2)$tumorside == "Left")
 loc2 <- as.numeric(phdata(df2)$tumorside == "Right")
 loc3 <- as.numeric(phdata(df2)$tumorside == "Multiple")
 loc4 <- as.numeric(phdata(df2)$tumorside == "Transverse")
 
-
-save("df2" = df2, file = "/lustre/scr/j/i/jinjin/GRA/meta_analysis/80405_2.Rdata")
+save("df2" = df2, file = "/lustre/scr/j/i/jinjin/GRA/meta_analysis/80405.Rdata")
 for(i in 1:nsnps){
-  if (i%%10000==0) print(paste(i, date()));
-  fit <- summary(coxph(Surv(time, status) ~ snps[,i]*phdata(df2)$Bev + snps[,i]
-                       + phdata(df2)$Bev + phdata(df2)$Cetux + loc1 + loc2 + loc3 + loc4   
+  if (i%%10000==0) print(paste(i, date()))
+  int <- snps[,i]*phdata(df2)$Bev
+  fit <- summary(coxph(Surv(time, status) ~ int + phdata(df2)$Bev
+                       + snps[,i] + loc1 + loc2 + loc3 + loc4 
                        + strata(phdata(df2)$prot_chemo, phdata(df2)$pr_adj, phdata(df2)$pr_rad)))
   coef[i] <- fit$coef[1, 1]
-  v[i] <- fit$coef[1,3]^2
+  v[i] <- fit$coef[1,3]
   p[i] <- fit$coef[1,5]
   ss[i] <- fit$n
+  maincoef[i] <- fit$coef[2, 1]
+  mainv[i] <- fit$coef[2, 3]
 }
 
 refallele <- refallele(gtdata(df2))
 effallele <- effallele(gtdata(df2))
-sumdf <- summary(gtdata(df2))
-afr <- sumdf[, "Q.2"]
+
+sumdf2 <- summary(gtdata(df2))
+afr <- sumdf2[, "Q.2"]
 maf <- pmin(afr, (1. - afr))
 
 result <- data.frame(snp = snp, chr = chr, refallele = refallele, effallele = effallele,
-                     bp = bp, coef = coef, sd = sqrt(v), pvalue = p, n = ss, maf = maf)
+                     bp = bp, coef = coef, sd = v, maincoef = maincoef, mainsd = mainv,
+                     pvalue = p, n = ss, maf = maf)
 
 ################ output ######################################
 

@@ -18,9 +18,9 @@ tools::md5sum(phenofile)
 convert.snp.tped(tpedfile = tpedfile, tfamfile = tfamfile, outfile = "genotype.raw")
 df <- load.gwaa.data(phe = phenofile, gen = "genotype.raw", force = T)
 
-#mc = check.marker(df, callrate = 0.95, extr.call = 0.95, maf = 0.05,
-#                  p.level = 1e-08, het.fdr = 0, ibs.exclude = "lower")
-#df = df[mc$idok, mc$snpok]
+mc = check.marker(df, callrate = 0.95, extr.call = 0.95, maf = 0.05,
+                  p.level = 1e-08, het.fdr = 0, ibs.exclude = "lower")
+df = df[mc$idok, mc$snpok]
 
 class(df)
 names(phdata(df))
@@ -56,10 +56,13 @@ p <- rep(0, nsnps)
 ss <- rep(0, nsnps)
 maf <- rep(0, nsnps) 
 
+arm <- phdata(df)$arm - 1
+
 for(i in 1:nsnps){
-  if (i%%10000==0) print(paste(i, date()));
-  fit <- summary(coxph(Surv(time, status) ~ snps[,i]*phdata(df)$arm + snps[,i]
-                       + phdata(df)$arm + strata(phdata(df)$priorrt, phdata(df)$dzext,
+  if (i%%10000==0) print(paste(i, date()))
+  int <- snps[,i]*arm
+  fit <- summary(coxph(Surv(time, status) ~ int + snps[,i]
+                       + strata(phdata(df)$priorrt, phdata(df)$dzext,
                                                  phdata(df)$ps) ))
   coef[i] <- fit$coef[1, 1]
   v[i] <- fit$coef[1,3]^2
